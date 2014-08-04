@@ -17,8 +17,11 @@ build-type:          Simple
 cabal-version:       >=1.10
 
 executable imago
-  main-is:             Imago.hs
-  -- other-modules:       
+  main-is:             Main.hs
+  other-modules:       Imago.Types
+                      ,Imago.Conv
+                      ,Imago.Hough
+                      ,Imago.Filters
   -- other-extensions:    
   build-depends:       base >=4.7 && <4.8
                       ,repa >= 0.3.3.1
