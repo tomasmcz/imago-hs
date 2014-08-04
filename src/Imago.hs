@@ -104,19 +104,22 @@ fromLuminance img = computeP $ traverse img id round255
 hough :: Filter
 hough img = normalize =<< do
   let hWidth = 800 :: Int
-  let hHeight = 600
-  let delta = pi / fromIntegral hHeight :: Double
-  let initAngle = pi / 4 + delta / 2 
-  let (Z :. iHeight :. iWidth) = extent img
-  let maxDst = fromIntegral $ min iHeight iWidth `div` 2
+      hHeight = 600
+      delta = pi / fromIntegral hHeight :: Double
+      initAngle = pi / 4 + delta / 2 
+      (Z :. iHeight :. iWidth) = extent img
+      (iWidthDiv2, iHeightDiv2) = (iWidth `div` 2, iHeight `div` 2)
+      maxDst = fromIntegral $ min iHeight iWidthDiv2
+      angles = [(an, initAngle + fromIntegral an * delta) | an <- [0..hHeight - 1]]
+      hWidthDiv2 = hWidth `div` 2
+      hWidthDiv2DivMax = fromIntegral hWidthDiv2 / maxDst
   h <- V.replicate (hWidth * hHeight) 0
   forM_ [Z :. y :. x | x <- [0..iWidth - 1], y <- [0..iHeight - 1]] $ \ ix -> 
     when (img R.! ix > 0) $
-      forM_ [0..hHeight - 1] $ \ an -> do
+      forM_ angles $ \ (an, angle) -> do
         let (Z :. yi :. xi) = ix
-        let (x, y) = (fromIntegral $ xi - iWidth `div` 2, fromIntegral $ yi - iHeight `div` 2) 
-        let angle = initAngle + fromIntegral an * delta
-        let dst = (+ hWidth `div` 2) . round . (* fromIntegral (hWidth `div` 2)) . (/ maxDst) $ x * sin angle + y * cos angle 
+        let (x, y) = (fromIntegral $ xi - iWidthDiv2, fromIntegral $ yi - iHeightDiv2) 
+        let dst = (+ hWidthDiv2) . round . (* hWidthDiv2DivMax) $ x * sin angle + y * cos angle 
         when (dst >= 0 && dst < hWidth) $ do
           old <- V.read h (an * hWidth + dst)
           V.write h (an * hWidth + dst) (old + img R.! ix)
