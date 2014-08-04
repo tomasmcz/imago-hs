@@ -65,8 +65,6 @@ peaks' = cutoff <=< computeP . mapStencil2 (BoundConst 0.5) st
                  -1 -1  -1 -1 -1  
                  -1 -1  -1 -1 -1 |] 
 
-
-
 gaussBlur :: Filter
 gaussBlur = computeP . R.map (/ 159) . mapStencil2 (BoundConst 0) gaussStencil 
   where
@@ -118,11 +116,12 @@ hough img = normalize =<< do
     when (img R.! ix > 0) $
       forM_ angles $ \ (an, angle) -> do
         let (Z :. yi :. xi) = ix
-        let (x, y) = (fromIntegral $ xi - iWidthDiv2, fromIntegral $ yi - iHeightDiv2) 
-        let dst = (+ hWidthDiv2) . round . (* hWidthDiv2DivMax) $ x * sin angle + y * cos angle 
+            (x, y) = (fromIntegral $ xi - iWidthDiv2, fromIntegral $ yi - iHeightDiv2) 
+            dst = (+ hWidthDiv2) . round . (* hWidthDiv2DivMax) $ x * sin angle + y * cos angle 
         when (dst >= 0 && dst < hWidth) $ do
-          old <- V.read h (an * hWidth + dst)
-          V.write h (an * hWidth + dst) (old + img R.! ix)
+          let hIndex = an * hWidth + dst
+          old <- V.read h hIndex 
+          V.write h hIndex (old + img R.! ix)
   hv <- V.freeze h
   return $ fromUnboxed (Z :. hHeight :. hWidth) hv
 
