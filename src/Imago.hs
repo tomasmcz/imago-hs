@@ -37,6 +37,36 @@ edges = cutoff <=< computeP . mapStencil2 (BoundConst 0) st
                  1 -8 1
                  1  1 1 |] 
 
+edges' :: Filter
+edges' = cutoff <=< computeP . mapStencil2 (BoundConst 0) st 
+  where
+    st = 
+      [stencil2| 1 1   1 1 1
+                 1 1   1 1 1 
+                 1 1 -24 1 1
+                 1 1   1 1 1 
+                 1 1   1 1 1 |] 
+
+peaks :: Filter
+peaks = cutoff <=< computeP . mapStencil2 (BoundConst 0) st 
+  where
+    st = 
+      [stencil2| -1 -1 -1
+                 -1  8 -1
+                 -1 -1 -1 |] 
+
+peaks' :: Filter
+peaks' = cutoff <=< computeP . mapStencil2 (BoundConst 0.5) st 
+  where
+    st = 
+      [stencil2| -1 -1  -1 -1 -1
+                 -1 -1  -1 -1 -1  
+                 -1 -1  24 -1 -1
+                 -1 -1  -1 -1 -1  
+                 -1 -1  -1 -1 -1 |] 
+
+
+
 gaussBlur :: Filter
 gaussBlur = computeP . R.map (/ 159) . mapStencil2 (BoundConst 0) gaussStencil 
   where
@@ -97,7 +127,9 @@ main :: IO ()
 main = do
   (RGB img) <- runIL $ readImage "image.jpg"
   blured <- gaussBlur =<< toLuminance img 
-  edged <- highpass 0.33 =<< normalize =<< edges blured
+  edged <- highpass 0.33 =<< normalize =<< edges' blured
+  runIL . writeImage "01.bmp" . Grey =<< fromLuminance edged
   houghed <- hough edged
-  final <- fromLuminance houghed
-  runIL $ writeImage "greyim.bmp" (Grey final)
+  runIL . writeImage "02.bmp" . Grey =<< fromLuminance houghed
+  filtered <- highpass 0.8 =<< peaks houghed
+  runIL . writeImage "03.bmp" . Grey =<< fromLuminance filtered
