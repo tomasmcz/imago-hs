@@ -2,15 +2,14 @@ module Imago.Hough
   (hough
   ) where
 
-import Imago.Types
-import Imago.Filters
-
+import Control.Loop
 import Control.Monad
 import Data.Array.Repa as R
 import qualified Data.Vector.Unboxed.Mutable as V
 import qualified Data.Vector.Unboxed as V hiding (replicate)
 
-import Control.Loop
+import Imago.Types
+import Imago.Filters
 
 hough :: Filter
 hough img = normalize =<< do
@@ -27,7 +26,8 @@ hough img = normalize =<< do
   h <- V.replicate (hWidth * hHeight) 0
   forLoop 0 (<iHeight) (+1) $ \ zy -> forLoop 0 (<iWidth) (+1) $ \ zx -> do 
     let ix = Z :. zy :. zx
-    when (img R.! ix > 0) $
+        pixel = img `unsafeIndex` ix
+    when (pixel > 0) $
       forM_ angles $ \ (an, angle) -> do
         let (Z :. yi :. xi) = ix
             (x, y) = (fromIntegral $ xi - iWidthDiv2, fromIntegral $ yi - iHeightDiv2) 
@@ -35,8 +35,6 @@ hough img = normalize =<< do
         when (dst >= 0 && dst < hWidth) $ do
           let hIndex = an * hWidth + dst
           old <- V.unsafeRead h hIndex 
-          V.unsafeWrite h hIndex (old + img R.! ix)
+          V.unsafeWrite h hIndex (old + pixel)
   hv <- V.unsafeFreeze h
   return $ fromUnboxed (Z :. hHeight :. hWidth) hv
-
-
