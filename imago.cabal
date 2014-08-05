@@ -28,6 +28,7 @@ executable imago
                       ,repa-algorithms >= 0.3.3.1
                       ,repa-devil >= 0.3.2.2
                       ,vector == 0.10.*
+                      ,loop
   hs-source-dirs:      src
   default-language:    Haskell2010
   ghc-options: -Odph -rtsopts -threaded -fno-liberate-case -funfolding-use-threshold1000 -funfolding-keeness-factor1000 -fllvm -optlo-O3

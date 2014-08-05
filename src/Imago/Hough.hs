@@ -10,6 +10,8 @@ import Data.Array.Repa as R
 import qualified Data.Vector.Unboxed.Mutable as V
 import qualified Data.Vector.Unboxed as V hiding (replicate)
 
+import Control.Loop
+
 hough :: Filter
 hough img = normalize =<< do
   let hWidth = 520 :: Int
@@ -23,7 +25,8 @@ hough img = normalize =<< do
       hWidthDiv2 = hWidth `div` 2
       hWidthDiv2DivMax = fromIntegral hWidthDiv2 / maxDst
   h <- V.replicate (hWidth * hHeight) 0
-  forM_ [Z :. y :. x | x <- [0..iWidth - 1], y <- [0..iHeight - 1]] $ \ ix -> 
+  forLoop 0 (<iHeight) (+1) $ \ zy -> forLoop 0 (<iWidth) (+1) $ \ zx -> do 
+    let ix = Z :. zy :. zx
     when (img R.! ix > 0) $
       forM_ angles $ \ (an, angle) -> do
         let (Z :. yi :. xi) = ix
