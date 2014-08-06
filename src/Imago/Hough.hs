@@ -19,7 +19,7 @@ hough img = normalize =<< do
       initAngle = pi / 4 + delta / 2 
       (Z :. iHeight :. iWidth) = extent img
       (iWidthDiv2, iHeightDiv2) = (iWidth `div` 2, iHeight `div` 2)
-      maxDst = fromIntegral $ min iHeight iWidthDiv2
+      maxDst = fromIntegral $ max iHeightDiv2 iWidthDiv2
       angles = [(an, initAngle + fromIntegral an * delta) | an <- [0..hHeight - 1]]
       hWidthDiv2 = hWidth `div` 2
       hWidthDiv2DivMax = fromIntegral hWidthDiv2 / maxDst
