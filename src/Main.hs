@@ -20,6 +20,7 @@ import Data.Array.MArray
 import Data.Array.Unsafe
 import Foreign.ForeignPtr
 import Foreign.Storable
+import Data.Bits
 
 deriving instance IArray UArray Color
 deriving instance Storable Color
@@ -58,20 +59,25 @@ fromLuminance img = computeP $
     (\ (Z :. x :. y) -> (Z :. x :. y :. 3))
     (\ f (Z :. x :. y :. _) -> round . (* 255) $ f (Z :. x :. y))
 
-addEmpty :: Array F DIM3 Word8 -> IO (Array F DIM3 Word8)
+addEmpty :: Array F DIM3 Word8 -> IO (Array F DIM2 Word)
 addEmpty img = computeP $
   traverse
     img
-    (\ (Z :. x :. y :. 3) -> (Z :. x :. y :. 4))
-    (\ f (Z :. x :. y :. z) -> if z == 3 then 0 else f (Z :. x :. y :. z))
+    (\ (Z :. x :. y :. _) -> (Z :. x :. y ))
+    (\ f (Z :. x :. y) ->
+      let r = fromIntegral $ f (Z :. x :. y :. 0)
+          g = fromIntegral $ f (Z :. x :. y :. 1)
+          b = fromIntegral $ f (Z :. x :. y :. 2)
+      in shift r 24 .|. shift g 16 .|. shift b 8
+    )
 
 makeGrey :: Array F DIM3 Word8 -> IO (Array F DIM3 Word8)
 makeGrey img = fromLuminance =<< toLuminance img
 
-convertArray :: Int -> Int -> Array F DIM3 Word8 -> IO (UArray Point Color)
+convertArray :: Int -> Int -> Array F DIM2 Word -> IO (UArray Point Color)
 convertArray w h arr = do
   let fptr = castForeignPtr $ toForeignPtr arr
-  stArr <- unsafeForeignPtrToStorableArray fptr (point 0 0, point 320 159)
+  stArr <- unsafeForeignPtrToStorableArray fptr (point 0 0, point (w - 1) (h - 1))
   fin <- freeze stArr
   touchForeignPtr fptr
   return fin
