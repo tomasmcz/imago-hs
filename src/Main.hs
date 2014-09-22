@@ -37,6 +37,7 @@ main = do
 
 type ImageDouble = Array U DIM2 Double
 type Filter = ImageDouble -> IO ImageDouble
+type RImage = Array F DIM3 Word8
 
 toLuminance :: Array F DIM3 Word8 -> IO ImageDouble
 toLuminance img = computeP $ 
@@ -74,22 +75,32 @@ addEmpty img = computeP $
 makeGrey :: Array F DIM3 Word8 -> IO (Array F DIM3 Word8)
 makeGrey img = fromLuminance =<< toLuminance img
 
-convertArray :: Int -> Int -> Array F DIM2 Word -> IO (UArray Point Color)
-convertArray w h arr = do
+convertArray :: Array F DIM2 Word -> IO (UArray Point Color)
+convertArray arr = do
   let fptr = castForeignPtr $ toForeignPtr arr
+      (Z :. h :. w) = extent arr
   stArr <- unsafeForeignPtrToStorableArray fptr (point 0 0, point (w - 1) (h - 1))
   fin <- freeze stArr
-  touchForeignPtr fptr
+--  touchForeignPtr fptr
   return fin
   
 dt :: Double
 dt = 20 * ms where ms = 1e-3
 
+img2bitmap :: Array F DIM3 Word8 -> IO (Bitmap ())
+img2bitmap img = do 
+    myimage <- imageCreateFromPixelArray =<< convertArray =<< addEmpty img
+    bitmapFromImage myimage
+
+selFunc :: Int -> RImage -> IO RImage
+selFunc 1 = makeGrey
+selFunc _ = pure . id
+
 main :: IO ()
 main = start $ do
     f <- frame [ text := "Hokus Pokus"
                ]
-    t  <- timer f [interval := ceiling (dt * 1e3)]
+    --t  <- timer f [interval := ceiling (dt * 1e3)]
     pp <- panel f [ bgcolor := white
                   ]
     radios <- radioBox f Vertical 
@@ -102,21 +113,22 @@ main = start $ do
                            ]
           ]
 
-    (RGB img) <- runIL $ readImage "image.jpg"
-    let (Z :. iHeight :. iWidth :. _) = extent img
-    print (iHeight, iWidth)
-    myimage <- imageCreateFromPixelArray =<< convertArray iWidth iHeight =<< addEmpty img
-    mybitmap <- bitmapFromImage myimage
+    (RGB inImg) <- runIL $ readImage "image.jpg"
 
     let networkDescription :: forall t. Frameworks t => Moment t ()
         networkDescription = do
         
-          etick <- event0 t command
+          --etick <- event0 t command
+          esel <- event0 radios select
     
-          let drawSprite :: DC a -> b -> IO ()
-              drawSprite dc _view = drawBitmap dc mybitmap (point 0 0) True []
-          sink pp [on paint :== pure drawSprite]
-          reactimate $ repaint pp <$ etick
+          let drawSprite :: RImage -> DC a -> b -> IO ()
+              drawSprite img dc _view = do
+                sel <- get radios selection
+                let tr = selFunc sel
+                mybitmap <- img2bitmap =<< tr img
+                drawBitmap dc mybitmap (point 0 0) True []
+          sink pp [on paint :== pure (drawSprite inImg)]
+          reactimate $ repaint pp <$ esel
 
     network <- compile networkDescription
     actuate network
