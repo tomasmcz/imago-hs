@@ -14,18 +14,10 @@ import Data.Word
 --import System.Environment
 
 import Imago.Conv
+import Imago.Filters
+import Imago.Hough
 
 import Repa2WX
-
-{-
-main :: IO ()
-main = do
-  [filename] <- getArgs
-  (RGB img) <- runIL $ readImage filename
-  blured <- gaussBlur =<< toLuminance img 
-  edged <- highpass 0.33 =<< normalize =<< edges5 blured
-  runIL . writeImage "01.bmp" . Grey =<< fromLuminance edged
--}
 
 type ImageDouble = Array U DIM2 Double
 type Filter = ImageDouble -> IO ImageDouble
@@ -57,7 +49,13 @@ makeGrey img = fromLuminance =<< toLuminance img
  
 makeBlur :: Array F DIM3 Word8 -> IO (Array F DIM3 Word8)
 makeBlur img = fromLuminance =<< gaussBlur =<< toLuminance img
- 
+
+makeEdges :: Array F DIM3 Word8 -> IO (Array F DIM3 Word8)
+makeEdges img = fromLuminance =<< highpass 0.33 =<< normalize =<< edges5 =<< gaussBlur =<< toLuminance img
+
+makeHough :: Array F DIM3 Word8 -> IO (Array F DIM3 Word8)
+makeHough img = fromLuminance =<< hough =<< highpass 0.33 =<< normalize =<< edges5 =<< gaussBlur =<< toLuminance img
+
 dt :: Double
 dt = 20 * ms where ms = 1e-3
 
@@ -67,9 +65,12 @@ img2bitmap img = do
     bitmapFromImage myimage
 
 selFunc :: Int -> RImage -> IO RImage
+selFunc 4 = makeHough
+selFunc 3 = makeEdges
 selFunc 2 = makeBlur
 selFunc 1 = makeGrey
-selFunc _ = pure . id
+selFunc 0 = pure . id
+selFunc _ = error "selFunc pattern failed"
 
 main :: IO ()
 main = start $ do
@@ -82,6 +83,8 @@ main = start $ do
                 [ "original"
                 , "grey-scale"
                 , "blured"
+                , "edges"
+                , "Hough"
                 ] []
  
     set f [layout := row 5 [ minsize (sz 400 300) $ widget pp
