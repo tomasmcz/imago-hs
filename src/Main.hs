@@ -56,6 +56,9 @@ makeEdges img = fromLuminance =<< highpass 0.33 =<< normalize =<< edges5 =<< gau
 makeHough :: Array F DIM3 Word8 -> IO (Array F DIM3 Word8)
 makeHough img = fromLuminance =<< hough =<< highpass 0.33 =<< normalize =<< edges5 =<< gaussBlur =<< toLuminance img
 
+makeHoughF :: Array F DIM3 Word8 -> IO (Array F DIM3 Word8)
+makeHoughF img = fromLuminance =<< highpass 0.2 =<< hough =<< highpass 0.33 =<< normalize =<< edges5 =<< gaussBlur =<< toLuminance img
+
 dt :: Double
 dt = 20 * ms where ms = 1e-3
 
@@ -65,6 +68,7 @@ img2bitmap img = do
     bitmapFromImage myimage
 
 selFunc :: Int -> RImage -> IO RImage
+selFunc 5 = makeHoughF
 selFunc 4 = makeHough
 selFunc 3 = makeEdges
 selFunc 2 = makeBlur
@@ -78,16 +82,17 @@ main = start $ do
                ]
     --t  <- timer f [interval := ceiling (dt * 1e3)]
     pp <- panel f [ bgcolor := white
-                  ]
+                 ]
     radios <- radioBox f Vertical 
                 [ "original"
                 , "grey-scale"
                 , "blured"
                 , "edges"
                 , "Hough"
+                , "filtered Hough"
                 ] []
  
-    set f [layout := row 5 [ minsize (sz 400 300) $ widget pp
+    set f [layout := row 5 [ minsize (sz 520 390) $ widget pp
                            , widget radios
                            ]
           ]
