@@ -13,6 +13,8 @@ import Data.Array.Repa.Repr.ForeignPtr
 import Data.Word
 --import System.Environment
 
+import Imago.Conv
+
 import Repa2WX
 
 {-
@@ -52,7 +54,9 @@ fromLuminance img = computeP $
 
 makeGrey :: Array F DIM3 Word8 -> IO (Array F DIM3 Word8)
 makeGrey img = fromLuminance =<< toLuminance img
-
+ 
+makeBlur :: Array F DIM3 Word8 -> IO (Array F DIM3 Word8)
+makeBlur img = fromLuminance =<< gaussBlur =<< toLuminance img
  
 dt :: Double
 dt = 20 * ms where ms = 1e-3
@@ -63,6 +67,7 @@ img2bitmap img = do
     bitmapFromImage myimage
 
 selFunc :: Int -> RImage -> IO RImage
+selFunc 2 = makeBlur
 selFunc 1 = makeGrey
 selFunc _ = pure . id
 
@@ -76,6 +81,7 @@ main = start $ do
     radios <- radioBox f Vertical 
                 [ "original"
                 , "grey-scale"
+                , "blured"
                 ] []
  
     set f [layout := row 5 [ minsize (sz 400 300) $ widget pp
