@@ -16,6 +16,28 @@ build-type:          Simple
 -- extra-source-files:  
 cabal-version:       >=1.10
 
+flag noExecutable
+  description: Do not build the executable 
+  default:     False
+
+library
+  exposed-modules:       Imago.Types
+                      ,Imago.Conv
+                      ,Imago.Hough
+                      ,Imago.Filters
+  -- other-extensions:    
+  build-depends:       base >=4.6 && <4.8
+                      ,repa >= 0.3.3.1
+                      ,repa-algorithms >= 0.3.3.1
+                      ,repa-devil >= 0.3.2.2
+                      ,vector == 0.10.*
+                      ,loop
+                      ,JuicyPixels-canvas
+                      ,JuicyPixels-repa
+  hs-source-dirs:      src
+  default-language:    Haskell2010
+  ghc-options: -Odph -rtsopts -threaded -fno-liberate-case -funfolding-use-threshold1000 -funfolding-keeness-factor1000 -fllvm -optlo-O3
+
 executable imago
   main-is:             Main.hs
   other-modules:       Imago.Types
@@ -23,12 +45,17 @@ executable imago
                       ,Imago.Hough
                       ,Imago.Filters
   -- other-extensions:    
-  build-depends:       base >=4.7 && <4.8
+  if flag(noExecutable)
+    buildable: False
+  else
+    build-depends:       base >=4.6 && <4.8
                       ,repa >= 0.3.3.1
                       ,repa-algorithms >= 0.3.3.1
                       ,repa-devil >= 0.3.2.2
                       ,vector == 0.10.*
                       ,loop
+                      ,JuicyPixels-canvas
+                      ,JuicyPixels-repa
   hs-source-dirs:      src
   default-language:    Haskell2010
   ghc-options: -Odph -rtsopts -threaded -fno-liberate-case -funfolding-use-threshold1000 -funfolding-keeness-factor1000 -fllvm -optlo-O3

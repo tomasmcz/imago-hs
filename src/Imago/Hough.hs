@@ -1,5 +1,5 @@
 module Imago.Hough
-  (hough
+  ( hough
   ) where
 
 import Control.Loop
