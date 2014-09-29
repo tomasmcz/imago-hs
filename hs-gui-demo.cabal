@@ -17,7 +17,8 @@ cabal-version:       >=1.10
 
 executable hs-gui-demo
   main-is:             Main.hs
-  -- other-modules:       
+  other-modules:    Repa2WX
+                  , RevHough
   -- other-extensions:    
   build-depends:  base >=4.6 && <4.8
                 , array

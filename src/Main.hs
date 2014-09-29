@@ -18,6 +18,7 @@ import Imago.Filters
 import Imago.Hough
 
 import Repa2WX
+import RevHough
 
 type ImageDouble = Array U DIM2 Double
 type Filter = ImageDouble -> IO ImageDouble
