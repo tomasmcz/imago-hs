@@ -12,8 +12,6 @@ import Imago.Conv
 import Imago.Filters
 import Imago.Hough
 
---import Codec.Picture.Repa (Img(..))
-
 toLuminance :: Array F DIM3 Word8 -> IO ImageDouble
 toLuminance img = computeP $ 
   traverse
@@ -38,7 +36,6 @@ main :: IO ()
 main = do
   [filename] <- getArgs
   (RGB img) <- runIL $ readImage filename
-  --let canv = Img img
   blured <- gaussBlur =<< toLuminance img 
   edged <- highpass 0.33 =<< normalize =<< edges5 blured
   runIL . writeImage "01.bmp" . Grey =<< fromLuminance edged
