@@ -1,6 +1,9 @@
-module RevHough where
+module RevHough
+  ( hough2LineAD
+  , extractHough
+  ) where
 
-import Data.Array.Repa as R ((:.)(..), Array(..), DIM2, index, U, Z(..))
+import Data.Array.Repa as R ((:.)(..), Array(..), DIM2, index, Z(..))
 import Data.Array.Repa.Repr.Unboxed
 
 data LineAD = LineAD Double Double
@@ -21,9 +24,9 @@ hough2LineAD (iW, iH) (w, h) = LineAD angle dst
     dst = fromIntegral w / hWidthDiv2DivMax 
 
 extractHough :: ImageDouble -> [LineAD]
-extractHough hImg = map hough2LineAD 
+extractHough hImg = map (hough2LineAD (520, 390))
   [ (x, y) 
   | x <- [0..389]
   , y <- [0..519]
-  , R.index (Z :. x :. y) > 0
+  , R.index hImg (Z :. x :. y) > 0
   ]
