@@ -3,11 +3,16 @@ module RevHough
   , extractHough
   ) where
 
-import Data.Array.Repa as R ((:.)(..), Array(..), DIM2, index, Z(..))
+import Data.Array.Repa as R ((:.)(..), DIM2, index, Z(..))
 import Data.Array.Repa.Repr.Unboxed
+import Codec.Picture.Canvas
+import Codec.Picture
 
 data LineAD = LineAD Double Double
 type ImageDouble = Array U DIM2 Double
+type Point = (Int, Int)
+type Line = (Point, Point)
+type Img = Image PixelRGB8
 
 hough2LineAD :: (Int, Int) -> (Int, Int) -> LineAD
 hough2LineAD (iW, iH) (w, h) = LineAD angle dst
@@ -30,3 +35,25 @@ extractHough hImg = map (hough2LineAD (520, 390))
   , y <- [0..519]
   , R.index hImg (Z :. x :. y) > 0
   ]
+
+lineAD2line :: (Int, Int) -> LineAD -> Line
+lineAD2line (w, h) (LineAD angle dist) = 
+  if pi < 4 * angle && 4 * angle < 3 * pi
+    then
+      let y1 = fromIntegral $ (- h) `div` 2
+          x1 = (+ w `div` 2) . round $ y1 * cos angle + dist / sin angle 
+          y2 = fromIntegral $ h `div` 2
+          x2 = (+ w `div` 2) . round $ y2 * cos angle + dist / sin angle 
+      in ((x1, 0), (x2, h))
+    else
+      let x1 = fromIntegral $ (- w) `div` 2
+          y1 = (+ h `div` 2) . round $ x1 * sin angle - dist / cos angle 
+          x2 = fromIntegral $ w `div` 2
+          y2 = (+ h `div` 2) . round $ x2 * sin angle - dist / cos angle 
+      in ((0, y1), (w, y2))
+
+paintLines :: Img -> ImageDouble -> Img
+paintLines orig hough = undefined
+  where
+    size = undefined
+    lines = map (lineAD2line size) $ extractHough hough
