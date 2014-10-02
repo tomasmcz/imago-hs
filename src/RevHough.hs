@@ -6,6 +6,7 @@ module RevHough
 import Data.Array.Repa as R ((:.)(..), DIM2, DIM3, index, Z(..))
 import Data.Array.Repa.Repr.ForeignPtr
 import Data.Array.Repa.Repr.Unboxed
+import Data.Word
 import Codec.Picture
 import Codec.Picture.Canvas
 import Codec.Picture.Repa
@@ -15,8 +16,14 @@ type ImageDouble = Array U DIM2 Double
 type Point = (Int, Int)
 type Line = (Point, Point)
 
---repa2canvas :: Array F DIM3 Word8 -> Canvas PixelRGBA8
---repa2canvas img =  _ $ imgToImage (Img img :: Img RGBA)
+img2canvas :: Img RGBA -> Canvas PixelRGBA8
+img2canvas img = canvas
+  where
+    Right canvas = imageToCanvas image
+    ImageRGBA8 image = imgToImage $ img
+
+canvas2repa :: Canvas PixelRGBA8 -> Array F DIM3 Word8
+canvas2repa = imgData . (convertImage :: Image PixelRGBA8 -> Img RGBA) . canvasToImage 
 
 hough2LineAD :: (Int, Int) -> (Int, Int) -> LineAD
 hough2LineAD (iW, iH) (w, h) = LineAD angle dst
@@ -56,7 +63,7 @@ lineAD2line (w, h) (LineAD angle dist) =
           y2 = (+ h `div` 2) . round $ x2 * sin angle - dist / cos angle 
       in ((0, y1), (w, y2))
 
---paintLines :: Img -> ImageDouble -> Img
+paintLines :: Canvas a -> ImageDouble -> Canvas a
 paintLines orig hough = undefined
   where
     size = undefined
