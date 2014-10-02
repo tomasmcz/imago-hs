@@ -25,7 +25,6 @@ executable hs-gui-demo
                 , reactive-banana-wx
                 , repa >= 0.3.3.1
                 , repa-algorithms >= 0.3.3.1
-                , repa-devil >= 0.3.2.2
                 , JuicyPixels
                 , JuicyPixels-canvas
                 , JuicyPixels-repa

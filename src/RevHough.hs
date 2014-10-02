@@ -3,16 +3,20 @@ module RevHough
   , extractHough
   ) where
 
-import Data.Array.Repa as R ((:.)(..), DIM2, index, Z(..))
+import Data.Array.Repa as R ((:.)(..), DIM2, DIM3, index, Z(..))
+import Data.Array.Repa.Repr.ForeignPtr
 import Data.Array.Repa.Repr.Unboxed
-import Codec.Picture.Canvas
 import Codec.Picture
+import Codec.Picture.Canvas
+import Codec.Picture.Repa
 
 data LineAD = LineAD Double Double
 type ImageDouble = Array U DIM2 Double
 type Point = (Int, Int)
 type Line = (Point, Point)
-type Img = Image PixelRGB8
+
+--repa2canvas :: Array F DIM3 Word8 -> Canvas PixelRGBA8
+--repa2canvas img =  _ $ imgToImage (Img img :: Img RGBA)
 
 hough2LineAD :: (Int, Int) -> (Int, Int) -> LineAD
 hough2LineAD (iW, iH) (w, h) = LineAD angle dst
@@ -52,7 +56,7 @@ lineAD2line (w, h) (LineAD angle dist) =
           y2 = (+ h `div` 2) . round $ x2 * sin angle - dist / cos angle 
       in ((0, y1), (w, y2))
 
-paintLines :: Img -> ImageDouble -> Img
+--paintLines :: Img -> ImageDouble -> Img
 paintLines orig hough = undefined
   where
     size = undefined

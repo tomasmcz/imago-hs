@@ -7,10 +7,10 @@ import Reactive.Banana
 import Reactive.Banana.WX
 
 import Data.Array.Repa as R
-import Data.Array.Repa.IO.DevIL
 import Data.Array.Repa.Algorithms.Pixel
 import Data.Array.Repa.Repr.ForeignPtr
 import Data.Word
+import Codec.Picture.Repa
 --import System.Environment
 
 import Imago.Conv
@@ -98,7 +98,8 @@ main = start $ do
                            ]
           ]
 
-    (RGB inImg) <- runIL $ readImage "image.jpg"
+    Right jImg <- readImageRGBA "image.jpg"
+    let inImg = imgData jImg
 
     let networkDescription :: forall t. Frameworks t => Moment t ()
         networkDescription = do
