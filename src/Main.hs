@@ -60,6 +60,9 @@ makeHough img = fromLuminance =<< hough =<< highpass 0.33 =<< normalize =<< edge
 makeHoughF :: Array F DIM3 Word8 -> IO (Array F DIM3 Word8)
 makeHoughF img = fromLuminance =<< highpass 0.2 =<< hough =<< highpass 0.33 =<< normalize =<< edges5 =<< gaussBlur =<< toLuminance img
 
+makeHough2DF :: Array F DIM3 Word8 -> IO ImageDouble
+makeHough2DF img = highpass 0.2 =<< hough =<< highpass 0.33 =<< normalize =<< edges5 =<< gaussBlur =<< toLuminance img
+
 dt :: Double
 dt = 20 * ms where ms = 1e-3
 
@@ -68,19 +71,23 @@ img2bitmap img = do
     myimage <- imageCreateFromPixelArray =<< convertArray =<< addEmpty img
     bitmapFromImage myimage
 
-selFunc :: Int -> RImage -> IO RImage
-selFunc 5 = makeHoughF
-selFunc 4 = makeHough
-selFunc 3 = makeEdges
-selFunc 2 = makeBlur
-selFunc 1 = makeGrey
-selFunc 0 = pure . id
+selFunc :: Int -> Img RGBA -> IO RImage
+selFunc 6 = \ img -> do 
+  hgh <- makeHough2DF . imgData $ img
+  return . canvas2repa . paintLines hgh . img2canvas $ img
+  
+selFunc 5 = makeHoughF . imgData
+selFunc 4 = makeHough . imgData
+selFunc 3 = makeEdges . imgData
+selFunc 2 = makeBlur . imgData
+selFunc 1 = makeGrey . imgData
+selFunc 0 = pure . id . imgData
 selFunc _ = error "selFunc pattern failed"
 
 main :: IO ()
 main = start $ do
     f <- frame [ text := "Hokus Pokus"
-               ]
+              ]
     --t  <- timer f [interval := ceiling (dt * 1e3)]
     pp <- panel f [ bgcolor := white
                  ]
@@ -91,6 +98,7 @@ main = start $ do
                 , "edges"
                 , "Hough"
                 , "filtered Hough"
+                , "lines"
                 ] []
  
     set f [layout := row 5 [ minsize (sz 520 390) $ widget pp
@@ -98,8 +106,7 @@ main = start $ do
                            ]
           ]
 
-    Right jImg <- readImageRGBA "image.jpg"
-    let inImg = imgData jImg
+    Right inImg <- readImageRGBA "image.jpg"
 
     let networkDescription :: forall t. Frameworks t => Moment t ()
         networkDescription = do
@@ -107,7 +114,7 @@ main = start $ do
           --etick <- event0 t command
           esel <- event0 radios select
     
-          let drawSprite :: RImage -> DC a -> b -> IO ()
+          let drawSprite :: Img RGBA -> DC a -> b -> IO ()
               drawSprite img dc _view = do
                 sel <- get radios selection
                 let tr = selFunc sel

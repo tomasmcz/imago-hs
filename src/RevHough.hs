@@ -1,6 +1,9 @@
 module RevHough
   ( hough2LineAD
   , extractHough
+  , img2canvas
+  , canvas2repa
+  , paintLines
   ) where
 
 import Data.Array.Repa as R ((:.)(..), DIM2, DIM3, index, Z(..))
@@ -63,8 +66,9 @@ lineAD2line (w, h) (LineAD angle dist) =
           y2 = (+ h `div` 2) . round $ x2 * sin angle - dist / cos angle 
       in ((0, y1), (w, y2))
 
-paintLines :: Canvas a -> ImageDouble -> Canvas a
-paintLines orig hough = undefined
+paintLines :: ImageDouble -> Canvas PixelRGBA8 -> Canvas PixelRGBA8
+paintLines hough orig = foldl (flip draw) orig lns
   where
-    size = undefined
-    lines = map (lineAD2line size) $ extractHough hough
+    draw ((a, b), (c, d)) = drawLine a b c d (PixelRGBA8 0 255 0 0)
+    size = (390, 240)
+    lns = map (lineAD2line size) $ extractHough hough
