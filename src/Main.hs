@@ -58,10 +58,10 @@ makeHough :: Array F DIM3 Word8 -> IO (Array F DIM3 Word8)
 makeHough img = fromLuminance =<< hough =<< highpass 0.33 =<< normalize =<< edges5 =<< gaussBlur =<< toLuminance img
 
 makeHoughF :: Array F DIM3 Word8 -> IO (Array F DIM3 Word8)
-makeHoughF img = fromLuminance =<< highpass 0.2 =<< hough =<< highpass 0.33 =<< normalize =<< edges5 =<< gaussBlur =<< toLuminance img
+makeHoughF img = fromLuminance =<< highpass 0.33 =<< hough =<< highpass 0.33 =<< normalize =<< edges5 =<< gaussBlur =<< toLuminance img
 
 makeHough2DF :: Array F DIM3 Word8 -> IO ImageDouble
-makeHough2DF img = highpass 0.2 =<< hough =<< highpass 0.33 =<< normalize =<< edges5 =<< gaussBlur =<< toLuminance img
+makeHough2DF img = highpass 0.33 =<< hough =<< highpass 0.33 =<< normalize =<< edges5 =<< gaussBlur =<< toLuminance img
 
 dt :: Double
 dt = 20 * ms where ms = 1e-3
