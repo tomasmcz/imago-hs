@@ -72,9 +72,12 @@ img2bitmap img = do
     bitmapFromImage myimage
 
 selFunc :: Int -> Img RGBA -> IO RImage
-selFunc 6 = \ img -> do 
+selFunc 7 = \ img -> do 
   hgh <- makeHough2DF . imgData $ img
   return . canvas2repa . paintLines hgh . img2canvas $ img
+
+selFunc 6 = \ img -> do
+  hgh <- makeHough2DF . imgData $ img
   
 selFunc 5 = makeHoughF . imgData
 selFunc 4 = makeHough . imgData
@@ -98,6 +101,7 @@ main = start $ do
                 , "edges"
                 , "Hough"
                 , "filtered Hough"
+                , "RANSAC"
                 , "lines"
                 ] []
  

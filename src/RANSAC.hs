@@ -1,21 +1,24 @@
 module RANSAC
-  (
+  ( points2param
+  , param2points
+  , dst
+  , randomLine
   ) where
 
 import Control.Monad.Random
 import Data.List (delete)
-import System.Random
+import System.Random ()
 
 type LineParam = (Double, Double, Double)
 type Point = (Int, Int)
 type LinePoints = (Point, Point)
-type Size = (Int, Int)
+--type Size = (Int, Int)
 
 points2param :: LinePoints -> LineParam
 points2param ((a, b), (c, d)) = (fromIntegral $ d - b, fromIntegral $ a - c, fromIntegral $ c * b - a * d)
 
-param2points :: Size -> LineParam -> LinePoints
-param2points (w, h) (a, b, c) = undefined
+param2points :: LineParam -> LinePoints
+param2points (a, b, c) = ((0, round $ (-c) / b), (round $ (-c) / a, 0))
 
 dst :: LineParam -> Point -> Double
 dst (a, b, c) (x, y) = abs (a * (fromIntegral x) + b * (fromIntegral y) + c) / sqrt (a * a + b * b)
