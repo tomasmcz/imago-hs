@@ -1,8 +1,11 @@
 module RevHough
   ( hough2LineAD
   , extractHough
+  , extractHoughPoints
   , img2canvas
   , canvas2repa
+  , lineAD2line
+  , paintL
   , paintLines
   ) where
 
@@ -43,7 +46,10 @@ hough2LineAD (iW, iH) (w, h) = LineAD angle dst
     dst = fromIntegral (w - hWidthDiv2) * hWidthDiv2DivMax 
 
 extractHough :: (Int, Int) -> ImageDouble -> [LineAD]
-extractHough (w, h) hImg = map (hough2LineAD (w, h))
+extractHough (w, h) = map (hough2LineAD (w, h)) . extractHoughPoints 
+
+extractHoughPoints :: ImageDouble -> [Point]
+extractHoughPoints hImg = 
   [ (x, y) 
   | x <- [0..519]
   , y <- [0..389]
@@ -72,3 +78,10 @@ paintLines hough orig = foldl (flip draw) orig lns
     draw ((a, b), (c, d)) = drawLine a b c d (PixelRGBA8 0 255 0 0)
     size = (canvasWidth orig, canvasHeight orig)
     lns = map (lineAD2line size) $ extractHough size hough
+
+paintL :: [Line] -> Canvas PixelRGBA8 -> Canvas PixelRGBA8 
+paintL lns orig = foldl (flip draw) orig lns
+  where
+    draw ((a, b), (c, d)) = drawLine a b c d (PixelRGBA8 0 255 0 0)
+
+

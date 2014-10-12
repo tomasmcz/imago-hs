@@ -2,12 +2,19 @@ module RANSAC
   ( points2param
   , param2points
   , dst
+  , rIterate
   , randomLine
+  , ransac
   ) where
 
+import Control.Monad
+import Control.Monad.State
 import Control.Monad.Random
 import Data.List (delete)
 import System.Random ()
+
+import Data.Packed.Matrix
+import Numeric.LinearAlgebra.Algorithms
 
 type LineParam = (Double, Double, Double)
 type Point = (Int, Int)
@@ -28,3 +35,31 @@ randomLine lst = do
   p1 <- uniform lst
   p2 <- uniform $ p1 `delete` lst
   return $ points2param (p1, p2)
+
+consensus :: LineParam -> [Point] -> [Point]
+consensus l ps = filter (\ p -> dst l p < 2) ps
+
+rIterate :: [Point] -> LineParam -> (Int, LineParam)
+rIterate ps l =
+  let c = consensus l ps in flip evalState (c, length c) . fix $ \ loop -> do 
+    (cns, s) <- get
+    let nextLn = leastSquares cns
+        nextCns = consensus nextLn ps
+        nextS = length nextCns
+    if nextS > s
+      then do
+        put (nextCns, nextS)
+        loop
+      else return (s, nextLn)
+
+ransac :: [Point] -> Int -> Rand StdGen LineParam
+ransac ps n = do
+  lst <- replicateM n (randomLine ps)
+  return . snd . maximum $ map (rIterate ps) lst
+    
+leastSquares :: [Point] -> LineParam
+leastSquares ps = (a, -1, c)
+  where
+    x  = fromLists [[fromIntegral q, 1] | (q, _) <- ps] 
+    y  = fromLists [[fromIntegral r] | (_, r) <- ps] 
+    [[a], [c]] = toLists $ linearSolveLS x y

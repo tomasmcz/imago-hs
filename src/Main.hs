@@ -6,12 +6,14 @@ import Graphics.UI.WX hiding (Event)
 import Reactive.Banana
 import Reactive.Banana.WX
 
-import Data.Array.Repa as R
+import Data.Array.Repa as R hiding (map)
 import Data.Array.Repa.Algorithms.Pixel
 import Data.Array.Repa.Repr.ForeignPtr
 import Data.Word
 import Codec.Picture.Repa
 --import System.Environment
+
+import Control.Monad.Random
 
 import Imago.Conv
 import Imago.Filters
@@ -19,6 +21,7 @@ import Imago.Hough
 
 import Repa2WX
 import RevHough
+import RANSAC
 
 type ImageDouble = Array U DIM2 Double
 type Filter = ImageDouble -> IO ImageDouble
@@ -78,6 +81,12 @@ selFunc 7 = \ img -> do
 
 selFunc 6 = \ img -> do
   hgh <- makeHough2DF . imgData $ img
+  let (Z :. h :. w :. _) = extent . imgData $ img
+      points = extractHoughPoints hgh
+  rline <- evalRandIO $ ransac points 20
+  let lns = map param2points [rline]
+      --lns = map (lineAD2line (w, h) . hough2LineAD (w, h)) points
+  return . canvas2repa . paintL lns . img2canvas . repa2img =<< fromLuminance hgh
   
 selFunc 5 = makeHoughF . imgData
 selFunc 4 = makeHough . imgData
@@ -93,7 +102,7 @@ main = start $ do
               ]
     --t  <- timer f [interval := ceiling (dt * 1e3)]
     pp <- panel f [ bgcolor := white
-                 ]
+                  ]
     radios <- radioBox f Vertical 
                 [ "original"
                 , "grey-scale"

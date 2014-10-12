@@ -1,6 +1,10 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving, StandaloneDeriving, MultiParamTypeClasses #-}
 
-module Repa2WX where
+module Repa2WX
+  ( addEmpty
+  , convertArray
+  , repa2img
+  ) where
 
 import Graphics.UI.WXCore.WxcTypes
 import Data.Array.Unboxed hiding (Array)
@@ -13,8 +17,13 @@ import Foreign.Storable
 import Graphics.UI.WX ()
 import Data.Bits
 
+import Codec.Picture.Repa (Img, RGBA)
+import Unsafe.Coerce (unsafeCoerce)
+
 deriving instance IArray UArray Color
 deriving instance Storable Color
+
+data ImgProxy = ImgProxy (Array F DIM3 Word8)
 
 addEmpty :: Array F DIM3 Word8 -> IO (Array F DIM2 Word)
 addEmpty img = computeP $
@@ -37,3 +46,6 @@ convertArray arr = do
 --  touchForeignPtr fptr
   return fin
  
+repa2img :: Array F DIM3 Word8 -> Img RGBA
+repa2img = unsafeCoerce . ImgProxy
+
