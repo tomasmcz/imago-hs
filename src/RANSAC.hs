@@ -1,6 +1,7 @@
 module RANSAC
   ( points2param
   , param2points
+  , consensus
   , dst
   , rIterate
   , randomLine
@@ -8,7 +9,7 @@ module RANSAC
   ) where
 
 import Control.Monad
-import Control.Monad.State
+import Control.Monad.Fix
 import Control.Monad.Random
 import Data.List (delete)
 import System.Random ()
@@ -40,17 +41,16 @@ consensus :: LineParam -> [Point] -> [Point]
 consensus l ps = filter (\ p -> dst l p < 2) ps
 
 rIterate :: [Point] -> LineParam -> (Int, LineParam)
-rIterate ps l =
-  let c = consensus l ps in flip evalState (c, length c) . fix $ \ loop -> do 
-    (cns, s) <- get
-    let nextLn = leastSquares cns
-        nextCns = consensus nextLn ps
-        nextS = length nextCns
-    if nextS > s
-      then do
-        put (nextCns, nextS)
-        loop
-      else return (s, nextLn)
+rIterate ps l = f (c, length c)
+  where
+    c = consensus l ps
+    f = fix $ \ loop (cns, s) -> do 
+      let nextLn = leastSquares cns
+          nextCns = consensus nextLn ps
+          nextS = length nextCns
+      if nextS > s
+        then loop (nextCns, nextS)
+        else (s, nextLn)
 
 ransac :: [Point] -> Int -> Rand StdGen LineParam
 ransac ps n = do

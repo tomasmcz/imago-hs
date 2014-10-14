@@ -75,17 +75,23 @@ img2bitmap img = do
     bitmapFromImage myimage
 
 selFunc :: Int -> Img RGBA -> IO RImage
-selFunc 7 = \ img -> do 
+selFunc 8 = \ img -> do 
   hgh <- makeHough2DF . imgData $ img
   return . canvas2repa . paintLines hgh . img2canvas $ img
 
-selFunc 6 = \ img -> do
+selFunc 7 = \ img -> do
   hgh <- makeHough2DF . imgData $ img
   let (Z :. h :. w :. _) = extent . imgData $ img
       points = extractHoughPoints hgh
   rline <- evalRandIO $ ransac points 20
+  let lns = map (lineAD2line (w, h) . hough2LineAD (w, h)) (consensus rline points)
+  return . canvas2repa . paintL lns . img2canvas $ img
+ 
+selFunc 6 = \ img -> do
+  hgh <- makeHough2DF . imgData $ img
+  let points = extractHoughPoints hgh
+  rline <- evalRandIO $ ransac points 20
   let lns = map param2points [rline]
-      --lns = map (lineAD2line (w, h) . hough2LineAD (w, h)) points
   return . canvas2repa . paintL lns . img2canvas . repa2img =<< fromLuminance hgh
   
 selFunc 5 = makeHoughF . imgData
@@ -111,6 +117,7 @@ main = start $ do
                 , "Hough"
                 , "filtered Hough"
                 , "RANSAC"
+                , "RANSAC lines"
                 , "lines"
                 ] []
  
