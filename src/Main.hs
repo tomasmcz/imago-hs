@@ -83,15 +83,15 @@ selFunc 7 = \ img -> do
   hgh <- makeHough2DF . imgData $ img
   let (Z :. h :. w :. _) = extent . imgData $ img
       points = extractHoughPoints hgh
-  rline <- evalRandIO $ ransac points 20
-  let lns = map (lineAD2line (w, h) . hough2LineAD (w, h)) (consensus rline points)
+  rlines <- evalRandIO $ ransac2 points 20
+  let lns = map (lineAD2line (w, h) . hough2LineAD (w, h)) $ concatMap snd rlines 
   return . canvas2repa . paintL lns . img2canvas $ img
  
 selFunc 6 = \ img -> do
   hgh <- makeHough2DF . imgData $ img
   let points = extractHoughPoints hgh
-  rline <- evalRandIO $ ransac points 20
-  let lns = map param2points [rline]
+  rlines <- evalRandIO $ ransac2 points 20
+  let lns = map (param2points . fst) rlines
   return . canvas2repa . paintL lns . img2canvas . repa2img =<< fromLuminance hgh
   
 selFunc 5 = makeHoughF . imgData

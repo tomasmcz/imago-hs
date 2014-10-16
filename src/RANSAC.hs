@@ -6,12 +6,13 @@ module RANSAC
   , rIterate
   , randomLine
   , ransac
+  , ransac2
   ) where
 
 import Control.Monad
 import Control.Monad.Fix
 import Control.Monad.Random
-import Data.List (delete)
+import Data.List (delete, (\\))
 import System.Random ()
 
 import Data.Packed.Matrix
@@ -40,7 +41,7 @@ randomLine lst = do
 consensus :: LineParam -> [Point] -> [Point]
 consensus l ps = filter (\ p -> dst l p < 2) ps
 
-rIterate :: [Point] -> LineParam -> (Int, LineParam)
+rIterate :: [Point] -> LineParam -> (Int, LineParam, [Point])
 rIterate ps l = f (c, length c)
   where
     c = consensus l ps
@@ -50,12 +51,22 @@ rIterate ps l = f (c, length c)
           nextS = length nextCns
       if nextS > s
         then loop (nextCns, nextS)
-        else (s, nextLn)
+        else (s, nextLn, nextCns)
 
-ransac :: [Point] -> Int -> Rand StdGen LineParam
+ransac :: [Point] -> Int -> Rand StdGen (LineParam, [Point])
 ransac ps n = do
   lst <- replicateM n (randomLine ps)
-  return . snd . maximum $ map (rIterate ps) lst
+  let (_, l, c) = maximum $ map (rIterate ps) lst
+  return (l, c)
+    
+ransac2 :: [Point] -> Int -> Rand StdGen [(LineParam, [Point])]
+ransac2 ps n = do
+  lst <- replicateM n (randomLine ps)
+  let (_, l, c) = maximum $ map (rIterate ps) lst
+      np = ps \\ c
+  lst2 <- replicateM n (randomLine np)
+  let (_, l2, c2) = maximum $ map (rIterate np) lst2
+  return [(l, c), (l2, c2)]
     
 leastSquares :: [Point] -> LineParam
 leastSquares ps = (a, -1, c)
