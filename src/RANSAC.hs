@@ -39,7 +39,7 @@ randomLine lst = do
   return $ points2param (p1, p2)
 
 consensus :: LineParam -> [Point] -> [Point]
-consensus l ps = filter (\ p -> dst l p < 2) ps
+consensus l ps = filter (\ p -> dst l p < 3) ps
 
 rIterate :: [Point] -> LineParam -> (Int, LineParam, [Point])
 rIterate ps l = f (c, length c)
@@ -72,5 +72,5 @@ leastSquares :: [Point] -> LineParam
 leastSquares ps = (a, -1, c)
   where
     x  = fromLists [[fromIntegral q, 1] | (q, _) <- ps] 
-    y  = fromLists [[fromIntegral r] | (_, r) <- ps] 
+    y  = fromLists [[fromIntegral r]    | (_, r) <- ps] 
     [[a], [c]] = toLists $ linearSolveLS x y
