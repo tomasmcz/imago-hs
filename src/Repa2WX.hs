@@ -1,4 +1,5 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving, StandaloneDeriving, MultiParamTypeClasses #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Repa2WX
   ( addEmpty
@@ -28,13 +29,13 @@ addEmpty :: Array F DIM3 Word8 -> IO (Array F DIM3 Word8)
 addEmpty img = computeP $
   traverse
     img
-    (\ (Z :. x :. y :. _) -> (Z :. x :. y :. 4))
+    (\ (Z :. x :. y :. _) -> (Z :. x :. y :. sizeOf (0 :: Int)))
     (\ f (Z :. x :. y :. z) ->
       case z of
        3 -> f (Z :. x :. y :. 0)
        2 -> f (Z :. x :. y :. 1)
        1 -> f (Z :. x :. y :. 2)
-       0 -> 0
+       _ -> 0
     )
 
 convertArray :: Array F DIM3 Word8 -> IO (UArray Point Color)
@@ -42,9 +43,7 @@ convertArray arr = do
   let fptr = castForeignPtr $ toForeignPtr arr
       (Z :. h :. w :. _) = extent arr
   stArr <- unsafeForeignPtrToStorableArray fptr (point 0 0, point (w - 1) (h - 1))
-  fin <- freeze stArr
---  touchForeignPtr fptr
-  return fin
+  freeze stArr
  
 repa2img :: Array F DIM3 Word8 -> Img RGBA
 repa2img = unsafeCoerce . ImgProxy
