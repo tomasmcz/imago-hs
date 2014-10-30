@@ -15,7 +15,6 @@ import Data.Array.Repa.Repr.ForeignPtr
 import Foreign.ForeignPtr
 import Foreign.Storable
 import Graphics.UI.WX ()
-import Data.Bits
 
 import Codec.Picture.Repa (Img, RGBA)
 import Unsafe.Coerce (unsafeCoerce)
@@ -25,22 +24,23 @@ deriving instance Storable Color
 
 data ImgProxy = ImgProxy (Array F DIM3 Word8)
 
-addEmpty :: Array F DIM3 Word8 -> IO (Array F DIM2 Word)
+addEmpty :: Array F DIM3 Word8 -> IO (Array F DIM3 Word8)
 addEmpty img = computeP $
   traverse
     img
-    (\ (Z :. x :. y :. _) -> (Z :. x :. y ))
-    (\ f (Z :. x :. y) ->
-      let r = fromIntegral $ f (Z :. x :. y :. 0)
-          g = fromIntegral $ f (Z :. x :. y :. 1)
-          b = fromIntegral $ f (Z :. x :. y :. 2)
-      in shift r 24 .|. shift g 16 .|. shift b 8
+    (\ (Z :. x :. y :. _) -> (Z :. x :. y :. 4))
+    (\ f (Z :. x :. y :. z) ->
+      case z of
+       3 -> f (Z :. x :. y :. 0)
+       2 -> f (Z :. x :. y :. 1)
+       1 -> f (Z :. x :. y :. 2)
+       0 -> 0
     )
 
-convertArray :: Array F DIM2 Word -> IO (UArray Point Color)
+convertArray :: Array F DIM3 Word8 -> IO (UArray Point Color)
 convertArray arr = do
   let fptr = castForeignPtr $ toForeignPtr arr
-      (Z :. h :. w) = extent arr
+      (Z :. h :. w :. _) = extent arr
   stArr <- unsafeForeignPtrToStorableArray fptr (point 0 0, point (w - 1) (h - 1))
   fin <- freeze stArr
 --  touchForeignPtr fptr
