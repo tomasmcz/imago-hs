@@ -18,10 +18,10 @@ import Control.Monad.Random
 import Imago.Conv
 import Imago.Filters
 import Imago.Hough
+import Imago.RANSAC
 
 import Repa2WX
 import RevHough
-import RANSAC
 import Camera
 
 type ImageDouble = Array U DIM2 Double
