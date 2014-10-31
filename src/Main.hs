@@ -7,7 +7,6 @@ import Reactive.Banana
 import Reactive.Banana.WX
 
 import Data.Array.Repa as R hiding (map)
-import Data.Array.Repa.Algorithms.Pixel
 import Data.Array.Repa.Repr.ForeignPtr
 import Data.Word
 import Codec.Picture.Repa
@@ -15,7 +14,7 @@ import Codec.Picture.Repa
 
 import Control.Monad.Random
 
-import Imago.Conv
+import Imago.Conv hiding (fromLuminance)
 import Imago.Filters
 import Imago.Hough
 import Imago.RANSAC
@@ -28,20 +27,6 @@ type ImageDouble = Array U DIM2 Double
 type Filter = ImageDouble -> IO ImageDouble
 type RImage = Array F DIM3 Word8
 
-toLuminance :: Array F DIM3 Word8 -> IO ImageDouble
-toLuminance img = computeP $ 
-  traverse
-    img
-    (\ (Z :. x :. y :. _) -> (Z :. x :. y))
-    luminosity
-
-luminosity :: (DIM3 -> Word8) -> DIM2 -> Double
-luminosity f (Z :. i :. j) = doubleLuminanceOfRGB8 (r, g, b)
-  where
-    r = f (Z :. i :. j :. 0)
-    g = f (Z :. i :. j :. 1)
-    b = f (Z :. i :. j :. 2)
-       
 fromLuminance :: ImageDouble -> IO (Array F DIM3 Word8)
 fromLuminance img = computeP $
   traverse
