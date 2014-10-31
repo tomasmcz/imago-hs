@@ -1,11 +1,11 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 cabal sandbox init
 cabal sandbox add-source ../imago
-cabal install Cabal
-cabal install wx
-cabal install reactive-banana-wx --allow-newer
-cabal install repa
-cabal install --only-dependencies
+cabal install Cabal $1
+cabal install wx $1
+cabal install reactive-banana-wx --allow-newer $1
+cabal install repa $1
+cabal install --only-dependencies $1

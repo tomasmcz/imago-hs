@@ -98,7 +98,7 @@ selFunc 4 img = liftImg makeHough img
 selFunc 3 img = liftImg makeEdges img
 selFunc 2 img = liftImg makeBlur img
 selFunc 1 img = liftImg makeGrey img
-selFunc 0 img = liftImg (pure . id) img
+selFunc 0 img = liftImg pure img
 selFunc _ _ = error "selFunc pattern failed"
 
 liftImg :: (RImage -> IO RImage) -> Img RGBA -> IO (Bitmap ())
@@ -115,7 +115,7 @@ main :: IO ()
 main = start $ do
     f <- frame [ text := "Hokus Pokus"
               ]
-    t  <- timer f [interval := 500]
+    t  <- timer f [interval := 1000]
     pp <- panel f [ bgcolor := white
                   ]
     radios <- radioBox f Vertical 

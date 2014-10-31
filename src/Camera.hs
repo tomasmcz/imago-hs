@@ -20,8 +20,7 @@ myGlobalVar = unsafePerformIO $ do
 getImage :: IO (Ptr IplImage)
 getImage = do
   cam <- readIORef myGlobalVar
-  frame <- cvQueryFrame  cam
-  return frame
+  cvQueryFrame  cam
 
 convertCV :: Ptr IplImage -> IO (Array F DIM3 Word8)
 convertCV p = do

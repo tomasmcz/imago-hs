@@ -26,7 +26,7 @@ img2canvas :: Img RGBA -> Canvas PixelRGBA8
 img2canvas img = canvas
   where
     Right canvas = imageToCanvas image
-    ImageRGBA8 image = imgToImage $ img
+    ImageRGBA8 image = imgToImage img
 
 canvas2repa :: Canvas PixelRGBA8 -> Array F DIM3 Word8
 canvas2repa = imgData . (convertImage :: Image PixelRGBA8 -> Img RGBA) . canvasToImage 
@@ -38,7 +38,7 @@ hough2LineAD (iW, iH) (w, h) = LineAD angle dst
     hHeight = 390 :: Int
     delta = pi / fromIntegral hHeight :: Double
     initAngle = pi / 4 + delta / 2 
-    angle = initAngle + delta * (fromIntegral h)
+    angle = initAngle + delta * fromIntegral h
     (iWidthDiv2, iHeightDiv2) = (iW `div` 2, iH `div` 2)
     maxDst = fromIntegral $ max iHeightDiv2 iWidthDiv2 
     hWidthDiv2 = hWidth `div` 2
