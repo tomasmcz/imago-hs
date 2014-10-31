@@ -12,8 +12,11 @@ module Imago.Conv
 
 import Control.Monad
 import Data.Array.Repa as R
+import Data.Array.Repa.Algorithms.Pixel
+import Data.Array.Repa.Repr.ForeignPtr
 import Data.Array.Repa.Stencil
 import Data.Array.Repa.Stencil.Dim2
+import Data.Word
 
 import Imago.Types
 import Imago.Filters
