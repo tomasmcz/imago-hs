@@ -8,4 +8,5 @@ This is an experimental Haskell fork of [Imago](https://github.com/tomasmcz/imag
 
 This is still work in progress. It has many dependencies (some of them should
 be eliminated, but I did not get to it yet). It is not easy to install. The
-code is not very well aranged.
+code is not very well aranged. It contains some very ugly hacks. There is no
+documentation. Use this at your own risk.
