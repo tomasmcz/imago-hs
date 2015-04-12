@@ -17,7 +17,7 @@ executable imago-wx-gui
   other-modules:    Repa2WX
                   , RevHough
   -- other-extensions:    
-  build-depends:  base >=4.6 && <4.8
+  build-depends:  base >=4.6 && <4.9
                 , array
                 , wx
                 , wxcore

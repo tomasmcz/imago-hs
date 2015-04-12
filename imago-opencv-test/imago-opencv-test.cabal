@@ -16,7 +16,7 @@ cabal-version:       >=1.10
 executable imago-opencv-test
   main-is:             Main.hs
   -- other-extensions:    
-  build-depends: base >=4.6 && <4.8
+  build-depends: base >=4.6 && <4.9
                , HOpenCV
                , imago
                , repa
