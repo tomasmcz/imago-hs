@@ -98,7 +98,7 @@ selInput _ = error "selInput pattern failed"
 
 main :: IO ()
 main = start $ do
-    f <- frame [ text := "Hokus Pokus"
+    f <- frame [ text := "Imago"
               ]
     t  <- timer f [interval := 1000]
     pp <- panel f [ bgcolor := white
@@ -125,8 +125,7 @@ main = start $ do
                            ]
           ]
 
-
-    let networkDescription :: forall t. Frameworks t => Moment t ()
+    let networkDescription :: forall t. MomentIO ()
         networkDescription = do
         
           etick <- event0 t command
@@ -142,7 +141,7 @@ main = start $ do
                 mybitmap <- tr img
                 drawBitmap dc mybitmap (point 0 0) True []
           sink pp [on paint :== pure drawSprite]
-          reactimate $ repaint pp <$ esel `union` eselIn `union` etick
+          reactimate $ repaint pp <$ etick -- TODO: [esel, eselIn, etick]
 
     network <- compile networkDescription
     actuate network

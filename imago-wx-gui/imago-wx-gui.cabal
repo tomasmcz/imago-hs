@@ -22,7 +22,6 @@ executable imago-wx-gui
                 , wx
                 , wxcore
                 , reactive-banana
-                , reactive-banana-wx
                 , repa >= 0.3.3.1
                 , repa-algorithms >= 0.3.3.1
                 , JuicyPixels
@@ -34,5 +33,5 @@ executable imago-wx-gui
                 , HOpenCV 
   hs-source-dirs: src
   default-language:    Haskell2010
-  ghc-options: -Odph -rtsopts -threaded -fno-liberate-case -funfolding-use-threshold1000 -funfolding-keeness-factor1000 -fllvm -optlo-O3
+  --ghc-options: -Odph -rtsopts -threaded -fno-liberate-case -funfolding-use-threshold1000 -funfolding-keeness-factor1000 -fllvm -optlo-O3
   ghc-prof-options: -auto-all

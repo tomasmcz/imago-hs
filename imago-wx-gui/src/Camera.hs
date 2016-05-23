@@ -12,28 +12,30 @@ import Data.IORef
 import System.IO.Unsafe
 
 {-# NOINLINE myGlobalVar #-}
-myGlobalVar :: IORef (Ptr CvCapture)
+myGlobalVar :: IORef Capture
 myGlobalVar = unsafePerformIO $ do
-  cam <- cvCreateCameraCapture 0
+  cam <- createCameraCapture 0
   newIORef cam 
 
-getImage :: IO (Ptr IplImage)
+getImage :: IO IplImage
 getImage = do
   cam <- readIORef myGlobalVar
-  cvQueryFrame  cam
+  queryFrame  cam
 
-convertCV :: Ptr IplImage -> IO (Array F DIM3 Word8)
-convertCV p = do
-  let sz = cvGetSize p
-      x = fromIntegral $ sizeWidth sz
+convertCV :: IplImage -> IO (Array F DIM3 Word8)
+convertCV img = do
+  sz <- getSize img
+  let x = fromIntegral $ sizeWidth sz
       y = fromIntegral $ sizeHeight sz
-  pArr <- peekByteOff p (22 * 4) 
-  fp <- newForeignPtr_ pArr
+  imgData <- getImageData img
+  fp <- newForeignPtr_ imgData
+  --pArr <- peekByteOff img (22 * 4) 
+  --fp <- newForeignPtr_ pArr
   return $! fromForeignPtr (Z :. y :. x :. 3) $ castForeignPtr fp
 
 bgr2rgb :: Array F DIM3 Word8 -> IO (Array F DIM3 Word8)
 bgr2rgb arr = computeP $
-  traverse
+  R.traverse
     arr
     (\ (Z :. y :. x :. z) -> (Z :. y :. x :. z))
     (\ f (Z :. y :. x :. z) -> 

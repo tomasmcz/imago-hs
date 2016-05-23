@@ -23,7 +23,7 @@ import Imago.Filters
 
 toLuminance :: Array F DIM3 Word8 -> IO ImageDouble
 toLuminance img = computeP $ 
-  traverse
+  R.traverse
     img
     (\ (Z :. x :. y :. _) -> (Z :. x :. y))
     luminosity
@@ -36,7 +36,7 @@ luminosity f (Z :. i :. j) = doubleLuminanceOfRGB8 (r, g, b)
     b = f (Z :. i :. j :. 2)
        
 fromLuminance :: ImageDouble -> IO (Array F DIM2 Word8)
-fromLuminance img = computeP $ traverse img id round255
+fromLuminance img = computeP $ R.traverse img id round255
   where
     round255 f (Z :. x :. y) = round . (* 255) $ f (Z :. x :. y)
 
