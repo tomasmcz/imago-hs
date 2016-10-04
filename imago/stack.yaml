@@ -1,0 +1,7 @@
+flags:
+  imago:
+    noexecutable: true
+packages:
+- '.'
+extra-deps: []
+resolver: lts-6.20

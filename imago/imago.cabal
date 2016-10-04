@@ -27,11 +27,11 @@ library
                       ,Imago.Filters
                       ,Imago.RANSAC
   -- other-extensions:    
-  build-depends: base >=4.6 && <4.9
+  build-depends: base >=4.6 && <=4.10
                , repa >= 0.3.3.1
                , repa-algorithms >= 0.3.3.1
                , repa-devil >= 0.3.2.2
-               , vector == 0.10.*
+               , vector >= 0.10
                , loop
                , random
                , MonadRandom
@@ -51,7 +51,7 @@ executable imago
   if flag(noExecutable)
     buildable: False
   else
-    build-depends:       base >=4.6 && <4.8
+    build-depends:       base >=4.6 && <4.10
                       ,repa >= 0.3.3.1
                       ,repa-algorithms >= 0.3.3.1
                       ,repa-devil >= 0.3.2.2
