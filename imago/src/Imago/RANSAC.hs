@@ -15,8 +15,8 @@ import Control.Monad.Random
 import Data.List (delete, (\\))
 import System.Random ()
 
-import Data.Packed.Matrix
-import Numeric.LinearAlgebra.Algorithms
+import Numeric.LinearAlgebra
+import Numeric.LinearAlgebra.Data
 
 type LineParam = (Double, Double, Double)
 type Point = (Int, Int)
@@ -30,7 +30,7 @@ param2points :: LineParam -> LinePoints
 param2points (a, b, c) = ((0, round $ (-c) / b), (round $ (-c) / a, 0))
 
 dst :: LineParam -> Point -> Double
-dst (a, b, c) (x, y) = abs (a * (fromIntegral x) + b * (fromIntegral y) + c) / sqrt (a * a + b * b)
+dst (a, b, c) (x, y) = abs (a * fromIntegral x + b * fromIntegral y + c) / sqrt (a * a + b * b)
 
 randomLine :: [Point] -> Rand StdGen LineParam
 randomLine lst = do
@@ -39,7 +39,7 @@ randomLine lst = do
   return $ points2param (p1, p2)
 
 consensus :: LineParam -> [Point] -> [Point]
-consensus l ps = filter (\ p -> dst l p < 3) ps
+consensus l = filter (\ p -> dst l p < 3)
 
 rIterate :: [Point] -> LineParam -> (Int, LineParam, [Point])
 rIterate ps l = f (c, length c)
