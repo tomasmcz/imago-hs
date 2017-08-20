@@ -13,11 +13,11 @@ build-type:          Simple
 cabal-version:       >=1.10
 
 executable imago-wx-gui
-  main-is:             Main.hs
+  main-is:          Main.hs
   other-modules:    Repa2WX
                   , RevHough
   -- other-extensions:    
-  build-depends:  base >=4.6 && <4.9
+  build-depends:  base >=4.6 && <4.11
                 , array
                 , wx
                 , wxcore
@@ -26,7 +26,7 @@ executable imago-wx-gui
                 , repa-algorithms >= 0.3.3.1
                 , JuicyPixels
                 , JuicyPixels-canvas
-                , JuicyPixels-repa
+                , JuicyPixels-repa >=0.7.0.1
                 , imago
                 , random
                 , MonadRandom

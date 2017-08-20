@@ -9,6 +9,7 @@ module RevHough
   , paintLines
   ) where
 
+import Data.Array.Repa (computeS)
 import Data.Array.Repa as R ((:.)(..), DIM2, DIM3, index, Z(..))
 import Data.Array.Repa.Repr.ForeignPtr
 import Data.Array.Repa.Repr.Unboxed
@@ -29,7 +30,7 @@ img2canvas img = canvas
     ImageRGBA8 image = imgToImage img
 
 canvas2repa :: Canvas PixelRGBA8 -> Array F DIM3 Word8
-canvas2repa = imgData . (convertImage :: Image PixelRGBA8 -> Img RGBA) . canvasToImage 
+canvas2repa = computeS . imgData . (convertImage :: Image PixelRGBA8 -> Img RGBA) . canvasToImage 
 
 hough2LineAD :: (Int, Int) -> (Int, Int) -> LineAD
 hough2LineAD (iW, iH) (w, h) = LineAD angle dst
@@ -83,5 +84,3 @@ paintL :: [Line] -> Canvas PixelRGBA8 -> Canvas PixelRGBA8
 paintL lns orig = foldl (flip draw) orig lns
   where
     draw ((a, b), (c, d)) = drawLine a b c d (PixelRGBA8 0 255 0 0)
-
-

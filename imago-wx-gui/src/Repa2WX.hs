@@ -7,7 +7,7 @@ module Repa2WX
   , repa2img
   ) where
 
-import Graphics.UI.WXCore.WxcTypes
+import Graphics.UI.WXCore.WxcTypes (Color(..), Word8, Word(..), Point, point)
 import Data.Array.Unboxed hiding (Array)
 import Data.Array.MArray
 import Data.Array.Unsafe
@@ -15,7 +15,7 @@ import Data.Array.Repa as R
 import Data.Array.Repa.Repr.ForeignPtr
 import Foreign.ForeignPtr
 import Foreign.Storable
-import Graphics.UI.WX ()
+--import Graphics.UI.WX ()
 
 import Codec.Picture.Repa (Img, RGBA)
 import Unsafe.Coerce (unsafeCoerce)
@@ -27,7 +27,7 @@ data ImgProxy = ImgProxy (Array F DIM3 Word8)
 
 addEmpty :: Array F DIM3 Word8 -> IO (Array F DIM3 Word8)
 addEmpty img = computeP $
-  traverse
+  R.traverse
     img
     (\ (Z :. x :. y :. _) -> (Z :. x :. y :. sizeOf (0 :: Int)))
     (\ f (Z :. x :. y :. z) ->
@@ -47,4 +47,3 @@ convertArray arr = do
  
 repa2img :: Array F DIM3 Word8 -> Img RGBA
 repa2img = unsafeCoerce . ImgProxy
-
