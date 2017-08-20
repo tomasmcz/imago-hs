@@ -1,7 +1,13 @@
 flags:
   imago:
     noexecutable: true
+
 packages:
 - '.'
-extra-deps: []
+
+allow-newer: true
+
+extra-deps:
+  - repa-devil-0.3.2.6
+
 resolver: lts-7.24

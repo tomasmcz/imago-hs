@@ -7,4 +7,4 @@ packages:
 
 extra-deps: []
 
-resolver: lts-6.35
+resolver: ghc-8.2.1
