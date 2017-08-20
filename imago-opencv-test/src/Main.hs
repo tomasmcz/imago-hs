@@ -1,5 +1,7 @@
 module Main where
 
+import Prelude hiding (traverse)
+
 import Foreign.Ptr
 import Foreign.ForeignPtr
 import Foreign.C.Types
