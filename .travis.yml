@@ -21,8 +21,25 @@ addons:
 matrix:
   include:
     - env: GHC_VERSION=7.10.3  STACK_YAML=stack-6.35.yaml IMAGO_DIR=imago
+      addons:
+        apt:
+          packages:
+            - libgmp-dev
+            - libblas-dev
+            - liblapack-dev
+            - libdevil-dev
     #- env: GHC_VERSION=8.0.1   STACK_YAML=stack-7.24.yaml
     - env: GHC_VERSION=8.0.2   STACK_YAML=stack-9.1.yaml IMAGO_DIR=imago-wx-gui
+      addons:
+        apt:
+          packages:
+            - libgmp-dev
+            - libblas-dev
+            - liblapack-dev
+            - libdevil-dev
+            - libopencv-dev
+            - libwxgtk3.0-dev
+            - libwxgtk-media3.0-dev
     #- env: GHC_VERSION=8.2.1   STACK_YAML=stack.yaml
 
 before_install:
