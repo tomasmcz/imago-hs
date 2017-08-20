@@ -18,6 +18,11 @@ addons:
       - liblapack-dev
       - libdevil-dev
 
+matrix:
+  include:
+    - env: STACK_YAML=stack-6.35.yaml
+    - env: STACK_YAML=stack-7.24.yaml
+
 before_install:
 # Download and unpack the stack executable
 - mkdir -p ~/.local/bin
