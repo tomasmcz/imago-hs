@@ -1,0 +1,28 @@
+flags:
+  imago:
+    noexecutable: true
+
+extra-package-dbs: []
+
+allow-newer: true
+
+packages:
+- '.'
+- '../imago/'
+
+extra-deps:
+- JuicyPixels-repa-0.7.1.0
+- HOpenCV-0.4.0.1
+- JuicyPixels-canvas-0.1.0.0
+- reactive-banana-1.1.0.1
+- wx-0.92.3.0
+- wxcore-0.92.3.0
+- allocated-processor-0.0.2
+- pqueue-1.3.2.3
+- wxc-0.92.3.0
+- wxdirect-0.92.3.0
+- repa-3.4.1.2
+- repa-algorithms-3.4.1.1
+- repa-devil-0.3.2.6
+
+resolver: lts-9.1

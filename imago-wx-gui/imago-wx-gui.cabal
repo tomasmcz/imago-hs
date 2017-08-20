@@ -16,6 +16,8 @@ executable imago-wx-gui
   main-is:          Main.hs
   other-modules:    Repa2WX
                   , RevHough
+                  , Camera
+                  , Reactive.Banana.WX
   -- other-extensions:    
   build-depends:  base >=4.6 && <4.11
                 , array

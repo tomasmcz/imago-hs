@@ -8,7 +8,7 @@ import Reactive.Banana.WX
 
 import Data.Array.Repa as R hiding (map)
 import Data.Array.Repa.Repr.ForeignPtr
-import Data.Word
+import Data.Word (Word8(..))
 import Codec.Picture.Repa
 --import System.Environment
 
@@ -23,13 +23,15 @@ import Repa2WX
 import RevHough
 import Camera
 
+import Data.Coerce
+
 type ImageDouble = Array U DIM2 Double
 type Filter = ImageDouble -> IO ImageDouble
 type RImage = Array F DIM3 Word8
 
 fromLuminance :: ImageDouble -> IO (Array F DIM3 Word8)
 fromLuminance img = computeP $
-  traverse
+  R.traverse
     img
     (\ (Z :. x :. y) -> (Z :. x :. y :. 3))
     (\ f (Z :. x :. y :. _) -> round . (* 255) $ f (Z :. x :. y))
@@ -54,17 +56,17 @@ makeHough2DF img = highpass 0.33 =<< hough =<< highpass 0.33 =<< normalize =<< e
 
 img2bitmap :: Array F DIM3 Word8 -> IO (Bitmap ())
 img2bitmap img = do 
-    myimage <- imageCreateFromPixelArray =<< convertArray =<< addEmpty img
+    myimage <- uncurry imageCreateFromPixels =<< convertArray =<< addEmpty img
     bitmapFromImage myimage
 
 selFunc :: Int -> Img RGBA -> IO (Bitmap ())
 
 selFunc 8 img = do 
-  hgh <- makeHough2DF . imgData $ img
+  hgh <- makeHough2DF . computeS . imgData $ img
   img2bitmap . canvas2repa . paintLines hgh . img2canvas $ img
 
 selFunc 7 img = do
-  hgh <- makeHough2DF . imgData $ img
+  hgh <- makeHough2DF . computeS . imgData $ img
   let (Z :. h :. w :. _) = extent . imgData $ img
       points = extractHoughPoints hgh
   rlines <- evalRandIO $ ransac2 points 20
@@ -72,7 +74,7 @@ selFunc 7 img = do
   img2bitmap . canvas2repa . paintL lns . img2canvas $ img
  
 selFunc 6 img = do
-  hgh <- makeHough2DF . imgData $ img
+  hgh <- makeHough2DF . computeS . imgData $ img
   let points = extractHoughPoints hgh
   rlines <- evalRandIO $ ransac2 points 20
   let lns = map (param2points . fst) rlines
@@ -87,7 +89,7 @@ selFunc 0 img = liftImg pure img
 selFunc _ _ = error "selFunc pattern failed"
 
 liftImg :: (RImage -> IO RImage) -> Img RGBA -> IO (Bitmap ())
-liftImg f img = img2bitmap =<< f (imgData img)
+liftImg f img = img2bitmap =<< f (computeS $ imgData img)
 
 selInput :: Int -> IO (Img RGBA)
 selInput 0 = do
